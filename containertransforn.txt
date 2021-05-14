@@ -1,0 +1,223 @@
+import 'package:animations/animations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  static final String title = 'Container Transform';
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: title,
+        theme: ThemeData(primarySwatch: Colors.deepOrange),
+        home: ContainerTransformPage(),
+      );
+}
+
+class CardWidget extends StatelessWidget {
+  final int index;
+  final VoidCallback onClicked;
+
+  const CardWidget({
+    @required this.index,
+    @required this.onClicked,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    print('Index: $index');
+    final url = 'https://source.unsplash.com/random?sig=$index';
+
+    return InkWell(
+      onTap: onClicked,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(url),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'Random Image',
+                  style: TextStyle(fontSize: 18),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Unsplash',
+                  style: Theme.of(context).textTheme.caption,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+const double fabSize = 56;
+
+class CustomFABWidget extends StatelessWidget {
+  final ContainerTransitionType transitionType;
+
+  const CustomFABWidget({
+    Key key,
+    @required this.transitionType,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => OpenContainer(
+        transitionDuration: Duration(milliseconds: 700),
+        openBuilder: (context, _) => DetailsPage(),
+        closedShape: CircleBorder(),
+        closedColor: Theme.of(context).primaryColor,
+        closedBuilder: (context, openContainer) => Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Theme.of(context).primaryColor,
+          ),
+          height: fabSize,
+          width: fabSize,
+          child: Icon(Icons.remove_red_eye, color: Colors.white),
+        ),
+      );
+}
+
+const String _loremIpsumParagraph =
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod '
+    'tempor incididunt ut labore et dolore magna aliqua. Vulputate dignissim '
+    'suspendisse in est. Ut ornare lectus sit amet. Eget nunc lobortis mattis '
+    'aliquam faucibus purus in. Hendrerit gravida rutrum quisque non tellus '
+    'orci ac auctor. Mattis aliquam faucibus purus in massa. Tellus rutrum '
+    'tellus pellentesque eu tincidunt tortor. Nunc eget lorem dolor sed. Nulla '
+    'at volutpat diam ut venenatis tellus in metus. Tellus cras adipiscing enim '
+    'eu turpis. Pretium fusce id velit ut tortor. Adipiscing enim eu turpis '
+    'egestas pretium. Quis varius quam quisque id. Blandit aliquam etiam erat '
+    'velit scelerisque. In nisl nisi scelerisque eu. Semper risus in hendrerit '
+    'gravida rutrum quisque. Suspendisse in est ante in nibh mauris cursus '
+    'mattis molestie. Adipiscing elit duis tristique sollicitudin nibh sit '
+    'amet commodo nulla. Pretium viverra suspendisse potenti nullam ac tortor '
+    'vitae.\n'
+    '\n'
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod '
+    'tempor incididunt ut labore et dolore magna aliqua. Vulputate dignissim '
+    'suspendisse in est. Ut ornare lectus sit amet. Eget nunc lobortis mattis '
+    'aliquam faucibus purus in. Hendrerit gravida rutrum quisque non tellus '
+    'orci ac auctor. Mattis aliquam faucibus purus in massa. Tellus rutrum '
+    'tellus pellentesque eu tincidunt tortor. Nunc eget lorem dolor sed. Nulla '
+    'at volutpat diam ut venenatis tellus in metus. Tellus cras adipiscing enim '
+    'eu turpis. Pretium fusce id velit ut tortor. Adipiscing enim eu turpis '
+    'egestas pretium. Quis varius quam quisque id. Blandit aliquam etiam erat '
+    'velit scelerisque. In nisl nisi scelerisque eu. Semper risus in hendrerit '
+    'gravida rutrum quisque. Suspendisse in est ante in nibh mauris cursus '
+    'mattis molestie. Adipiscing elit duis tristique sollicitudin nibh sit '
+    'amet commodo nulla. Pretium viverra suspendisse potenti nullam ac tortor '
+    'vitae';
+
+class DetailsPage extends StatelessWidget {
+  final int index;
+
+  const DetailsPage({
+    this.index = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          title: const Text('Details page'),
+        ),
+        body: ListView(
+          children: <Widget>[
+            Container(
+              height: 300,
+              child: Image.network(
+                'https://source.unsplash.com/random?sig=$index',
+                fit: BoxFit.cover,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Random Image',
+                    style: Theme.of(context).textTheme.headline5.copyWith(
+                          color: Colors.black54,
+                          fontSize: 30,
+                        ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    _loremIpsumParagraph,
+                    style: TextStyle(
+                      color: Colors.black54,
+                      height: 1.5,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+}
+
+class ContainerTransformPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final transitionType = ContainerTransitionType.fade;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(MyApp.title),
+      ),
+      body: StaggeredGridView.countBuilder(
+        crossAxisCount: 4,
+        mainAxisSpacing: 4,
+        crossAxisSpacing: 4,
+        itemCount: 10,
+        staggeredTileBuilder: (index) {
+          final crossAxisCount = 2;
+          final mainAxisCount = index.isEven ? 3 : 2;
+
+          return StaggeredTile.count(crossAxisCount, mainAxisCount);
+        },
+        itemBuilder: (context, index) => OpenContainer(
+          transitionType: transitionType,
+          transitionDuration: Duration(milliseconds: 500),
+          openBuilder: (context, _) => DetailsPage(index: index),
+          closedBuilder: (context, VoidCallback openContainer) => CardWidget(
+            index: index,
+            onClicked: openContainer,
+          ),
+        ),
+      ),
+      floatingActionButton: CustomFABWidget(transitionType: transitionType),
+    );
+  }
+}

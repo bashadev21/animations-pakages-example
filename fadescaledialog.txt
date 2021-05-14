@@ -1,0 +1,133 @@
+import 'package:animations/animations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  static final String title = 'Fade Animation';
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: title,
+        theme: ThemeData(primaryColor: Colors.red),
+        home: FadeScalePage(),
+      );
+}
+
+class ButtonWidget extends StatelessWidget {
+  final String text;
+  final VoidCallback onClicked;
+
+  const ButtonWidget({
+    @required this.text,
+    @required this.onClicked,
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => RaisedButton(
+        child: Text(
+          text,
+          style: TextStyle(fontSize: 24),
+        ),
+        shape: StadiumBorder(),
+        color: Theme.of(context).primaryColor,
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        textColor: Colors.white,
+        onPressed: onClicked,
+      );
+}
+
+class FadeScalePage extends StatefulWidget {
+  @override
+  _FadeScalePageState createState() => _FadeScalePageState();
+}
+
+class _FadeScalePageState extends State<FadeScalePage> with SingleTickerProviderStateMixin {
+  AnimationController controller;
+
+  bool get isForwardAnimation =>
+      controller.status == AnimationStatus.forward ||
+      controller.status == AnimationStatus.completed;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = AnimationController(
+      value: 0,
+      duration: Duration(milliseconds: 1000),
+      reverseDuration: Duration(milliseconds: 1000),
+      vsync: this,
+    )..addStatusListener((status) => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          title: Text(MyApp.title),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              ButtonWidget(
+                text: 'SHOW MODAL',
+                onClicked: () => showCustomDialog(context),
+              ),
+              SizedBox(height: 24),
+              ButtonWidget(
+                text: isForwardAnimation ? 'HIDE FAB' : 'SHOW FAB',
+                onClicked: toggleFAB,
+              ),
+            ],
+          ),
+        ),
+        floatingActionButton: buildFloatingActionButton(),
+      );
+
+  Widget buildFloatingActionButton() => AnimatedBuilder(
+        animation: controller,
+        builder: (context, child) => FadeScaleTransition(
+          animation: controller,
+          child: child,
+        ),
+        child: Visibility(
+          visible: controller.status != AnimationStatus.dismissed,
+          child: FloatingActionButton(child: Icon(Icons.add), onPressed: () {}),
+        ),
+      );
+
+  Future toggleFAB() => isForwardAnimation ? controller.reverse() : controller.forward();
+
+  Future showCustomDialog(BuildContext context) => showModal(
+        configuration: FadeScaleTransitionConfiguration(
+          transitionDuration: Duration(milliseconds: 500),
+          reverseTransitionDuration: Duration(milliseconds: 300),
+          barrierDismissible: false,
+        ),
+        context: context,
+        builder: (context) => Dialog(
+          child: Container(
+            height: 200,
+            child: Center(child: Text('demo Content')),
+          ),
+        ),
+      );
+}

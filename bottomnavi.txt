@@ -1,0 +1,172 @@
+import 'package:animations/animations.dart';
+import 'package:fancy_bottom_bar/fancy_bottom_bar.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:page_transition/page_transition.dart';
+
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  static final String title = 'Fade Through';
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: title,
+        theme: ThemeData(primarySwatch: Colors.purple),
+        home: FadeThroughPage(),
+      );
+}
+
+class CardWidget extends StatelessWidget {
+  final int index;
+
+  const CardWidget({
+    Key key,
+    @required this.index,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final urlImage = 'https://source.unsplash.com/random?sig=$index';
+
+    return Card(
+      child: Stack(
+        children: <Widget>[
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  color: Colors.black26,
+                  child: Image.network(urlImage, fit: BoxFit.cover),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Random Photo',
+                      style: Theme.of(context).textTheme.bodyText1,
+                    ),
+                    Text(
+                      'Unsplash',
+                      style: Theme.of(context).textTheme.caption,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class FirstPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+        ),
+        itemCount: 10,
+        itemBuilder: (context, index) => CardWidget(index: index),
+      );
+}
+
+class SecondPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => ListView.builder(
+        itemCount: 10,
+        itemBuilder: (context, index) => Container(
+          height: 200,
+          child: CardWidget(index: index),
+        ),
+      );
+}
+
+class FadeThroughPage extends StatefulWidget {
+  @override
+  _FadeThroughPageState createState() => _FadeThroughPageState();
+}
+
+class _FadeThroughPageState extends State<FadeThroughPage> {
+  int index = 0;
+
+  final pages = [
+    FirstPage(),
+    SecondPage(),
+  ];
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          title: Text(MyApp.title),
+        ),
+        drawer: Drawer(
+          child: Container(
+            child: Column(
+              children: [
+                ListTile(
+                  title: Text('profile'),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        PageTransition(
+                            type: PageTransitionType.rightToLeftWithFade,
+                            duration: Duration(milliseconds: 500),
+                            child: FadeThroughPage()));
+                  },
+                  leading: Icon(Icons.person),
+                ),
+                ListTile(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        PageTransition(
+                            type: PageTransitionType.rightToLeftWithFade,
+                            duration: Duration(milliseconds: 500),
+                            child: FadeThroughPage()));
+                  },
+                  title: Text('Home'),
+                  leading: Icon(Icons.home),
+                ),
+              ],
+            ),
+          ),
+        ),
+        body: PageTransitionSwitcher(
+          duration: Duration(milliseconds: 800),
+          transitionBuilder: (child, animation, secondaryAnimation) => FadeThroughTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            child: child,
+          ),
+          child: pages[index],
+        ),
+        bottomNavigationBar: FancyBottomBar(
+          onItemSelected: (i) => setState(() => index = i),
+          selectedPosition: index,
+          // backgroundColor: Theme.of(context).primaryColor,
+          // unselectedItemColor: Colors.white.withOpacity(0.7),
+          // selectedItemColor: Colors.white,
+          // currentIndex: index,
+          // onTap: (int index) => setState(() => this.index = index),
+          items: [
+            FancyBottomItem(title: Text("Home"), icon: Icon(Icons.home)),
+            FancyBottomItem(title: Text("Profile"), icon: Icon(Icons.person)),
+          ],
+        ),
+      );
+}
